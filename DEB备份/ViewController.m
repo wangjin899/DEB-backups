@@ -423,13 +423,13 @@ static NSString* spawnRoot(NSArray* argss){
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"删除备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"删除" message:self.myData[indexPath.row][@"Name"] preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"只删除此备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 [fileManager removeItemAtPath:self.myData[indexPath.row][@"Path"] error:nil];
                 [self 获取已备份];
                 [self.tableView reloadData];
             }]];
             
-            [alert addAction:[UIAlertAction actionWithTitle:@"删除所有备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"删除所有备份deb" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 [self DeleteAll];
                 [self.tableView reloadData];
             }]];

@@ -195,7 +195,7 @@
                             [[ViewController alloc]spawnRoot:@[@"touch",ncontrol]];
                             if([string writeToFile:ncontrol atomically:YES encoding:NSUTF8StringEncoding error:nil]){
                                 [[ViewController alloc]spawnRoot:@[@"mv",ncontrol,control]];
-                                NSString *debFilepath = [path stringByAppendingFormat:@"/%@.deb",dic[@"Name"]];
+                                NSString *debFilepath = [path stringByAppendingFormat:@"/%@-rootless.deb",dic[@"Name"]];
                                 [[ViewController alloc]spawnRoot:@[@"dpkg-deb",@"-b",npath,debFilepath]];
                                 [[ViewController alloc]spawnRoot:@[@"rm",@"-rf",npath]];
                                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"转换完毕" message:debFilepath preferredStyle:UIAlertControllerStyleAlert];
