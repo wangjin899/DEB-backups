@@ -177,6 +177,64 @@
                         [fileManager createDirectoryAtPath:[npath stringByAppendingPathComponent:@"var/jb"] withIntermediateDirectories:YES attributes:nil error:nil];
                         NSString *x = [[ViewController alloc]spawnRoot:@[@"dpkg-deb",@"-x",deb[i],[npath stringByAppendingPathComponent:@"var/jb"]]];
                         if(x){
+//                            NSString *bashScript = @"#!/bin/bash\nexport PATH=\"/var/jb/usr/bin:/var/jb/usr:/var/jb:/var/jb/bin\"\n";
+                            NSDirectoryEnumerator *enumeratorian = [[NSFileManager defaultManager] enumeratorAtPath:debian];
+                            NSString *fileNameian = nil;
+                            while (fileNameian = [enumeratorian nextObject]) {
+                                NSString *filePath = [debian stringByAppendingPathComponent:fileNameian];
+                                if (![fileNameian isEqual:@"control"]) {
+                                    NSString *fileContent = [[NSString alloc] initWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+                                    
+                                    NSMutableArray *lines = [fileContent componentsSeparatedByString:@"\n"].mutableCopy;
+                                    if([lines[0] containsString:@"#!"]){
+                                        NSMutableString *resultString = [NSMutableString string];
+                                        for (NSString *line in lines) {
+                                            NSArray *liness = [line componentsSeparatedByString:@" "];
+                                            NSString *linenew = line.copy;
+                                            if(lines.count && ![liness[liness.count-1] containsString:@"/var/jb"]){
+                                                NSString*v = [liness[liness.count-1] containsString:@"/"] ? @"/var/jb" : @"";
+                                                NSString*re = [v stringByAppendingString:liness[liness.count-1]];
+                                                linenew = [line stringByReplacingOccurrencesOfString:liness[liness.count-1] withString:re];
+                                            }
+                                            linenew = [linenew stringByReplacingOccurrencesOfString:liness[0] withString:[liness[0] lastPathComponent]];
+                                            [resultString appendFormat:@"%@\n",linenew];
+                                        }
+                                        NSString *string = [NSString stringWithString:resultString];
+                                        NSMutableArray *lines = [string componentsSeparatedByString:@"\n"].mutableCopy;
+                                        string = [string stringByReplacingOccurrencesOfString:lines[0] withString:@"#!/bin/bash"];
+//                                        string = [string stringByReplacingOccurrencesOfString:lines[0] withString:bashScript];
+                                            
+                                        NSString*ian = [npath stringByAppendingPathComponent:fileNameian];
+                                        [[ViewController alloc]spawnRoot:@[@"touch",ian]];
+                                        [string writeToFile:ian atomically:YES encoding:NSUTF8StringEncoding error:nil];
+                                        [[ViewController alloc]spawnRoot:@[@"rm",@"-rf",filePath]];
+                                        [[ViewController alloc]spawnRoot:@[@"mv",ian,filePath]];
+                                        [[ViewController alloc]spawnRoot:@[@"chmod",@"755",filePath]];
+                                    }
+                                }
+                            }
+                            {
+                                NSString*daemon = [npath stringByAppendingPathComponent:@"var/jb/Library/LaunchDaemons"];
+                                NSDirectoryEnumerator *enumeratorian = [[NSFileManager defaultManager] enumeratorAtPath:daemon];
+                                NSString *fileNameian = nil;
+                                while (fileNameian = [enumeratorian nextObject]) {
+                                    NSString *filePath = [daemon stringByAppendingPathComponent:fileNameian];
+                                    if ([fileNameian.pathExtension isEqual:@"plist"]) {
+                                        NSMutableDictionary *plist = [[NSMutableDictionary alloc] initWithContentsOfFile:filePath];
+                                        NSMutableArray*ProgramArguments = [plist[@"ProgramArguments"] mutableCopy];
+                                        if(ProgramArguments.count){
+                                            for(int i=0;i<ProgramArguments.count;i++){
+                                                [ProgramArguments replaceObjectAtIndex:i withObject:[@"/var/jb" stringByAppendingPathComponent:ProgramArguments[i]]];
+                                            }
+                                        }
+                                        [plist setObject:ProgramArguments forKey:@"ProgramArguments"];
+                                        [plist writeToFile:[npath stringByAppendingPathComponent:fileNameian] atomically:YES];
+                                        [[ViewController alloc]spawnRoot:@[@"rm",@"-rf",filePath]];
+                                        [[ViewController alloc]spawnRoot:@[@"mv",[npath stringByAppendingPathComponent:fileNameian],filePath]];
+                                    }
+                                }
+                                
+                            }
                             NSMutableString* newString = NSMutableString.alloc.init;
                             for (NSString *key in dic) {
                                 if(![key containsString:@" "]){
@@ -184,12 +242,12 @@
                                 }
                             }
                             [newString appendFormat:@"\n"];
-                            NSString*sign = [npath stringByAppendingPathComponent:@"/var/jb/Library"];
+                            NSString*sign = [npath stringByAppendingPathComponent:@"/var/jb"];
                             NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:sign];
                             NSString *fileName = nil;
                             while (fileName = [enumerator nextObject]) {
                                 NSString *filePath = [sign stringByAppendingPathComponent:fileName];
-                                [[ViewController alloc]spawnRoot:@[@"ldid",@"-S",filePath]];
+                                [[ViewController alloc]spawnRoot:@[@"ldid",@"-Hsha256",@"-s",filePath]];
                             }
                             NSString *string = [NSString stringWithString:newString];
                             [[ViewController alloc]spawnRoot:@[@"touch",ncontrol]];

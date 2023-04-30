@@ -430,8 +430,13 @@ static NSString* spawnRoot(NSArray* argss){
             }]];
             
             [alert addAction:[UIAlertAction actionWithTitle:@"删除所有备份deb" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-                [self DeleteAll];
-                [self.tableView reloadData];
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"确定删除所有备份？" message:nil preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"确定删除" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+                    [self DeleteAll];
+                    [self.tableView reloadData];
+                }]];
+                [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alert animated:true completion:nil];
             }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
             [self presentViewController:alert animated:true completion:nil];
