@@ -124,24 +124,6 @@
     
     if(indexPath.section == 2){
         [self RootToNoRoot];
-        //        [self dismissViewControllerAnimated:YES completion:nil];
-        //        if(indexPath.row){
-        //            [self dismissViewControllerAnimated:YES completion:nil];
-        //            UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"安装所有备份" preferredStyle:UIAlertControllerStyleAlert];
-        //            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-        //                [[ViewController alloc] InstallAll];
-        //            }]];
-        //            [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-        //            [[ViewController alloc].getview.rootViewController presentViewController:alert animated:true completion:nil];
-        //        }else{
-        //            [self dismissViewControllerAnimated:YES completion:nil];
-        //            UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"删除所有备份" preferredStyle:UIAlertControllerStyleAlert];
-        //            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-        //                [[ViewController alloc] DeleteAll];
-        //            }]];
-        //            [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-        //            [[ViewController alloc].getview.rootViewController presentViewController:alert animated:true completion:nil];
-        //        }
     }
     
     if(indexPath.section == 4){
@@ -245,8 +227,6 @@
     [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:true completion:nil];
 }
-
-
 
 - (void)segmentedControlValueChanged:(UISegmentedControl *)sender {
     //    NSLog(@"Selected segment index: %ld", sender.selectedSegmentIndex);
