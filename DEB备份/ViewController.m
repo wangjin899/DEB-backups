@@ -376,10 +376,10 @@ static NSString* spawnRoot(NSArray* argss){
                     [self setTextViewframe];
                 }]];
                 [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-                [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+                [self presentViewController:alert animated:true completion:nil];
             }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+            [self presentViewController:alert animated:true completion:nil];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"插件详情" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             NSDictionary *dictionary = self.myData[indexPath.row];
@@ -396,10 +396,10 @@ static NSString* spawnRoot(NSArray* argss){
                 [self BackupAll];
             }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+            [self presentViewController:alert animated:true completion:nil];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-        [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+        [self presentViewController:alert animated:true completion:nil];
     }else{
         NSFileManager *fileManager = [NSFileManager defaultManager];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.myData[indexPath.row][@"Name"] message:self.myData[indexPath.row][@"Package"] preferredStyle:UIAlertControllerStyleAlert];
@@ -423,13 +423,18 @@ static NSString* spawnRoot(NSArray* argss){
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"删除备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"删除" message:self.myData[indexPath.row][@"Name"] preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+            [alert addAction:[UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 [fileManager removeItemAtPath:self.myData[indexPath.row][@"Path"] error:nil];
                 [self 获取已备份];
                 [self.tableView reloadData];
             }]];
+            
+            [alert addAction:[UIAlertAction actionWithTitle:@"删除所有备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+                [self DeleteAll];
+                [self.tableView reloadData];
+            }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+            [self presentViewController:alert animated:true completion:nil];
         }]];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"安装此插件" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
@@ -440,7 +445,7 @@ static NSString* spawnRoot(NSArray* argss){
                 [self ShowtextView:[@"安装日志(双击隐藏)：\n" stringByAppendingString:cmdout]];
             }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+            [self presentViewController:alert animated:true completion:nil];
         }]];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"安装所有备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
@@ -449,12 +454,12 @@ static NSString* spawnRoot(NSArray* argss){
                 [self 安装所有];
             }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+            [self presentViewController:alert animated:true completion:nil];
         }]];
         
         
         [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-        [self.view.window.rootViewController presentViewController:alert animated:true completion:nil];
+        [self presentViewController:alert animated:true completion:nil];
     }
 }
 - (void)BackupAll{
@@ -570,6 +575,12 @@ static NSString* spawnRoot(NSArray* argss){
     }
 }
 
+- (NSString*)spawnRoot:(NSArray*)cmd{
+    return spawnRoot(cmd);
+}
+- (NSMutableDictionary*)read_control_info:(const char*)debpath{
+    return read_control_info(debpath);
+}
 
 - (UIWindow*)getview{
     return vc.view.window;
@@ -714,7 +725,9 @@ static NSMutableDictionary*parse_control_info_line(NSString *line) {
             NSCharacterSet *set = [NSCharacterSet whitespaceCharacterSet];
             key = [key stringByTrimmingCharactersInSet:set];
             value = [value stringByTrimmingCharactersInSet:set];
-            [packageDict setObject:value forKey:key];
+            if(![key containsString:@" "]){
+                [packageDict setObject:value forKey:key];
+            }
         }
     }
     return packageDict;

@@ -24,11 +24,12 @@
           @"items": @[@"推特",  @"Discord"],
           @"itemsx": @[@"https://twitter.com/bswbw" ,@"https://discord.gg/mezMfshK"]
         },
-        @{@"groupTitle": @"", @"items": @[@"一键删除所有备份",@"一键安装所有备份"]},
+        //        @{@"groupTitle": @"", @"items": @[@"一键删除所有备份",@"一键安装所有备份"]},
+        @{@"groupTitle": @"", @"items": @[@"有根DEB转无根（依赖ldid和dpkg插件）"]},
         @{@"groupTitle": @"你是什么越狱？", @"items": @[@""]},
         @{@"groupTitle": @"上方选择越狱再进入程序", @"items": @[@"进入程序 -> (加载全部已装插件)",@"进入程序 -> (过滤系统已装插件)"]}
     ];
-//    [self.navigationController.navigationBar setHidden:YES]; // 是否显示导航栏
+    //    [self.navigationController.navigationBar setHidden:YES]; // 是否显示导航栏
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleInsetGrouped];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -114,31 +115,33 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     NSDictionary *groupData = self.data[indexPath.section];
-//    NSArray *items = groupData[@"items"];
+    //    NSArray *items = groupData[@"items"];
     NSArray *itemsx = groupData[@"itemsx"];
-//    NSLog(@"Selected : %@", items[indexPath.row]);
+    //    NSLog(@"Selected : %@", items[indexPath.row]);
     if(indexPath.section == 1){
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:itemsx[indexPath.row]] options:@{} completionHandler:nil];
     }
     
     if(indexPath.section == 2){
-        if(indexPath.row){
-            [self dismissViewControllerAnimated:YES completion:nil];
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"安装所有备份" preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-                [[ViewController alloc] InstallAll];
-            }]];
-            [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [[ViewController alloc].getview.rootViewController presentViewController:alert animated:true completion:nil];
-        }else{
-            [self dismissViewControllerAnimated:YES completion:nil];
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"删除所有备份" preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-                [[ViewController alloc] DeleteAll];
-            }]];
-            [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
-            [[ViewController alloc].getview.rootViewController presentViewController:alert animated:true completion:nil];
-        }
+        [self RootToNoRoot];
+        //        [self dismissViewControllerAnimated:YES completion:nil];
+        //        if(indexPath.row){
+        //            [self dismissViewControllerAnimated:YES completion:nil];
+        //            UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"安装所有备份" preferredStyle:UIAlertControllerStyleAlert];
+        //            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+        //                [[ViewController alloc] InstallAll];
+        //            }]];
+        //            [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+        //            [[ViewController alloc].getview.rootViewController presentViewController:alert animated:true completion:nil];
+        //        }else{
+        //            [self dismissViewControllerAnimated:YES completion:nil];
+        //            UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:@"删除所有备份" preferredStyle:UIAlertControllerStyleAlert];
+        //            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+        //                [[ViewController alloc] DeleteAll];
+        //            }]];
+        //            [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+        //            [[ViewController alloc].getview.rootViewController presentViewController:alert animated:true completion:nil];
+        //        }
     }
     
     if(indexPath.section == 4){
@@ -151,8 +154,102 @@
         }
     }
 }
+- (void)RootToNoRoot{
+    NSString *path = @"/var/mobile/Documents/RootedToRootless";
+    BOOL isDirectory = NO;
+    NSMutableArray*deb = NSMutableArray.alloc.init;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [fileManager fileExistsAtPath:path isDirectory:&isDirectory];
+    if (!isDirectory) {
+        [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+    }else{
+        NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:path];
+        NSString *fileName = nil;
+        while (fileName = [enumerator nextObject]) {
+            NSString *filePath = [path stringByAppendingPathComponent:fileName];
+            if ([fileName.pathExtension isEqual:@"deb"]) {
+                [deb addObject:filePath];
+            }
+        }
+    }
+    NSString*bt = deb.count ? @"转换成功不代表兼容可用\n转换仅是让有根插件能在无根越狱安装成功" : @"没有文件，请先把要转换的deb放到\n/var/mobile/Documents/RootedToRootless\n文件夹内";
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:bt preferredStyle:UIAlertControllerStyleAlert];
+    for(int i=0;i<deb.count;i++){
+        NSMutableDictionary* dic = [[ViewController alloc]read_control_info:[deb[i] UTF8String]];
+        [alert addAction:[UIAlertAction actionWithTitle:dic[@"Name"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+            NSLog(@"%@", dic[@"Architecture"]);
+            NSString*npath = [path stringByAppendingPathComponent:dic[@"Package"]];
+            if([dic[@"Architecture"]isEqual:@"iphoneos-arm"]){
+                [dic setObject:@"iphoneos-arm64" forKey:@"Architecture"];
+                NSString*debian = [npath stringByAppendingPathComponent:@"DEBIAN"];
+                [fileManager createDirectoryAtPath:debian withIntermediateDirectories:YES attributes:nil error:nil];
+                NSString *e = [[ViewController alloc]spawnRoot:@[@"dpkg-deb",@"-e",deb[i],debian]];
+                if(e){
+                    NSString *ncontrol = [npath stringByAppendingPathComponent:@"control"];
+                    NSString *control = [debian stringByAppendingPathComponent:@"control"];
+                    [fileManager removeItemAtPath:control error:nil];
+                    NSString *r = [[ViewController alloc]spawnRoot:@[@"rm",@"-rf",control]];
+                    if(r){
+                        [fileManager createDirectoryAtPath:npath withIntermediateDirectories:YES attributes:nil error:nil];
+                        [fileManager createDirectoryAtPath:[npath stringByAppendingPathComponent:@"var"] withIntermediateDirectories:YES attributes:nil error:nil];
+                        [fileManager createDirectoryAtPath:[npath stringByAppendingPathComponent:@"var/jb"] withIntermediateDirectories:YES attributes:nil error:nil];
+                        NSString *x = [[ViewController alloc]spawnRoot:@[@"dpkg-deb",@"-x",deb[i],[npath stringByAppendingPathComponent:@"var/jb"]]];
+                        if(x){
+                            NSMutableString* newString = NSMutableString.alloc.init;
+                            for (NSString *key in dic) {
+                                if(![key containsString:@" "]){
+                                    [newString appendFormat:@"%@: %@\n",key,[dic objectForKey:key]];
+                                }
+                            }
+                            [newString appendFormat:@"\n"];
+                            NSString*sign = [npath stringByAppendingPathComponent:@"/var/jb/Library"];
+                            NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:sign];
+                            NSString *fileName = nil;
+                            while (fileName = [enumerator nextObject]) {
+                                NSString *filePath = [sign stringByAppendingPathComponent:fileName];
+                                [[ViewController alloc]spawnRoot:@[@"ldid",@"-S",filePath]];
+                            }
+                            NSString *string = [NSString stringWithString:newString];
+                            [[ViewController alloc]spawnRoot:@[@"touch",ncontrol]];
+                            if([string writeToFile:ncontrol atomically:YES encoding:NSUTF8StringEncoding error:nil]){
+                                [[ViewController alloc]spawnRoot:@[@"mv",ncontrol,control]];
+                                NSString *debFilepath = [path stringByAppendingFormat:@"/%@.deb",dic[@"Name"]];
+                                [[ViewController alloc]spawnRoot:@[@"dpkg-deb",@"-b",npath,debFilepath]];
+                                [[ViewController alloc]spawnRoot:@[@"rm",@"-rf",npath]];
+                                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"转换完毕" message:debFilepath preferredStyle:UIAlertControllerStyleAlert];
+                                [alert addAction:[UIAlertAction actionWithTitle:@"跳转Filza查看" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+                                    NSCharacterSet *CharacterSet = [NSCharacterSet URLQueryAllowedCharacterSet];
+                                    NSString *encodedURLString = [debFilepath stringByAddingPercentEncodingWithAllowedCharacters:CharacterSet];
+                                    NSURL *filzaURL = [NSURL URLWithString:[@"filza://view" stringByAppendingString:encodedURLString]];
+                                    [[UIApplication sharedApplication] openURL:filzaURL options:@{} completionHandler:nil];
+                                }]];
+                                [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+                                [self presentViewController:alert animated:true completion:nil];
+                            }
+                        }
+                    }
+                }
+            }else if([dic[@"Architecture"]isEqual:@"iphoneos-arm64"]){
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"此插件已是无根deb" preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"跳转Filza查看" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
+                    NSCharacterSet *CharacterSet = [NSCharacterSet URLQueryAllowedCharacterSet];
+                    NSString *encodedURLString = [deb[i] stringByAddingPercentEncodingWithAllowedCharacters:CharacterSet];
+                    NSURL *filzaURL = [NSURL URLWithString:[@"filza://view" stringByAppendingString:encodedURLString]];
+                    [[UIApplication sharedApplication] openURL:filzaURL options:@{} completionHandler:nil];
+                }]];
+                [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alert animated:true completion:nil];
+            }
+        }]];
+    }
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:alert animated:true completion:nil];
+}
+
+
+
 - (void)segmentedControlValueChanged:(UISegmentedControl *)sender {
-//    NSLog(@"Selected segment index: %ld", sender.selectedSegmentIndex);
+    //    NSLog(@"Selected segment index: %ld", sender.selectedSegmentIndex);
     if(sender.selectedSegmentIndex == 0){
         [[[ViewController alloc]init]selectedSegmentIndexxxxx:@"/var/jb"xxxxx:@"/var/jb/usr/bin/" ];
     }

@@ -49,6 +49,8 @@ typedef struct {
 @property (nonatomic, strong) NSMutableArray *buttonArray;
 - (void)DeleteAll;
 - (void)InstallAll;
+- (NSString*)spawnRoot:(NSArray*)cmd;
+- (NSMutableDictionary*)read_control_info:(const char*)debpath;
 - (void)openAll:(bool)op;
 - (UIWindow*)getview;
 - (void)selectedSegmentIndexxxxx:(NSString *)Index xxxxx:(NSString *)cmd;
