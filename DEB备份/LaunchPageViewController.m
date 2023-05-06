@@ -20,9 +20,9 @@
           @"items": @[@"已安装的插件列表，仅显示用户自行安装的插件和部分越狱自带插件", @"已备份的插件，可以跳转到Filza查看.deb文件", @"Fugu安装已备份的插件需要禁止注入本app"],
           @"itemsx": @[@"", @"",@"使用Choicy插件可以禁止注入"]
         },
-        @{@"groupTitle": @"作者信息",
-          @"items": @[@"推特",  @"Discord"],
-          @"itemsx": @[@"https://twitter.com/bswbw" ,@"https://discord.gg/mezMfshK"]
+        @{@"groupTitle": @"",
+          @"items": @[@"Twitter", @"Telegram", @"Discord"],
+          @"itemsx": @[@"https://twitter.com/bswbw" ,@"https://t.me/gblwjb",@"https://discord.gg/mezMfshK"]
         },
         //        @{@"groupTitle": @"", @"items": @[@"一键删除所有备份",@"一键安装所有备份"]},
         @{@"groupTitle": @"", @"items": @[@"有根DEB转无根（依赖ldid和dpkg插件）"]},

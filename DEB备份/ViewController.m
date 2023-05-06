@@ -12,12 +12,14 @@ extern int posix_spawnattr_set_persona_np(const posix_spawnattr_t* __restrict, u
 extern int posix_spawnattr_set_persona_uid_np(const posix_spawnattr_t* __restrict, uid_t);
 extern int posix_spawnattr_set_persona_gid_np(const posix_spawnattr_t* __restrict, uid_t);
 extern int posix_spawnattr_setenv(const posix_spawnattr_t* , char**, uid_t);
-@interface ViewController () <UITableViewDataSource, UITableViewDelegate>
-
+@interface ViewController () <UITableViewDataSource, UITableViewDelegate,UISearchBarDelegate>
+@property (nonatomic, strong) UISearchController *searchController;
 //@property (nonatomic) bool open;
 @property (nonatomic, strong) NSArray *myData;
 @property (nonatomic, strong) NSArray *myDatax;
+@property (nonatomic, strong) NSArray *alldeb;
 @property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) UISearchBar *searchBar;
 
 @end
 ViewController*vc;
@@ -94,7 +96,11 @@ static NSString* spawnRoot(NSArray* argss){
     return output;//WEXITSTATUS(status);//打印输出结果
 }
 
-- (void)获取已安装{
+- (NSArray *)获取已安装{
+    return [self 获取已安装:openall];
+}
+
+- (NSArray *)获取已安装:(bool)all{
     NSString *p = [jbpath stringByAppendingFormat:@"/Library/dpkg/status"];
     NSString *packageInfo = [NSString stringWithContentsOfFile:p encoding:NSUTF8StringEncoding error:nil];
     NSArray *packages = [packageInfo componentsSeparatedByString:@"\n\n"];
@@ -113,20 +119,22 @@ static NSString* spawnRoot(NSArray* argss){
         if([packageDict[@"Name"] length]){
             [arr addObject:packageDict];
         }else{
-            if(packageDict[@"Package"]&&openall){
+            if(packageDict[@"Package"]&&all){
                 [packageDict setObject:packageDict[@"Package"] forKey:@"Name"];
                 [arr addObject:packageDict];
             }
         }
     }
-    self.myData = arr;
+    return arr;
 }
-- (void)获取已备份{
+
+
+- (NSArray *)获取已备份{
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *path = @"/var/mobile/Documents/DebBackup";
     BOOL isDirectory = NO;
+    NSMutableArray*arr = [NSMutableArray array];
     if([fileManager fileExistsAtPath:path isDirectory:&isDirectory] && isDirectory) {
-        NSMutableArray*arr = [NSMutableArray array];
         NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtPath:path];
         for (NSString *fileName in enumerator) {
             NSString *filePath = [path stringByAppendingPathComponent:fileName];
@@ -136,10 +144,11 @@ static NSString* spawnRoot(NSArray* argss){
                 [arr addObject:Info];
             }
         }
-        self.myData = arr;
+//        self.myData = arr;
     }else{
         [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
     }
+    return arr;
 }
 
 - (void)openAll:(bool)op{
@@ -170,27 +179,11 @@ static NSString* spawnRoot(NSArray* argss){
     SEL selector = NSSelectorFromString(@"setUsagePoliciesForBundle:cellular:wifi:");
     ((bool(*)(id, SEL, NSString *, BOOL, BOOL))objc_msgSend)(cacheInstance, selector,NSBundle.mainBundle.bundleIdentifier, true, true);
     
-    //    jbpath = @"";
-    //    jbtype = JB_Root;
-    //    NSFileManager *fileManager = [NSFileManager defaultManager];
-    //    if([fileManager fileExistsAtPath:@"/var/jb/Library/dpkg/status"]){
-    //        jbtype = JB_FUGU;//fugu
-    //        jbpath = @"/var/jb";
-    //    }
-    //    if([fileManager fileExistsAtPath:@"/var/LIY/dpkg/status"]){
-    //        jbtype = JB_Xina;//xina
-    //        jbpath = @"/var";
-    //    }
-    
-    //    NSMutableDictionary*Info = read_control_info("/var/mobile/Documents/kGame.ios15.fugu_1.0.0-2_iphoneos-arm64.deb");
-    //    NSLog(@"%@",Info);
-    //    Info = read_control_info("/var/mobile/Documents/TouchflowX_1.0.6.deb");
-    //    NSLog(@"%@",Info);
-    
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self 获取已安装];
-        [self.navigationController.navigationBar setHidden:1]; // 显示导航栏
+        self.myData = [self 获取已安装];
+        self.alldeb = [self 获取已安装:true];
+        [self.navigationController.navigationBar setHidden:0]; // 显示导航栏
         [self.navigationController.navigationBar.topItem setTitle:@"已安装的插件"]; // 设置导航栏标题
         
         self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleInsetGrouped];
@@ -222,7 +215,42 @@ static NSString* spawnRoot(NSArray* argss){
             [self.buttonArray addObject:button];
             [button setBackgroundImage:[self imageWithColor:selectedColor] forState:UIControlStateSelected];
         }
+        // 创建 UISearchBar 实例
+        self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 44)];
+        self.searchBar.placeholder = @"搜索,输入插件名字";
+        self.searchBar.delegate = self;
+        UIView *backgroundView = [self.searchBar.subviews objectAtIndex:0];
+        UIImage *backgroundImage = [UIImage new];
+        [self.searchBar setBackgroundImage:backgroundImage];
+        self.searchBar.backgroundColor = [UIColor clearColor];
+        self.searchBar.searchBarStyle = UISearchBarStyleMinimal;
+        self.tableView.tableHeaderView = self.searchBar;
     });
+}
+
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    // 搜索条件发生变化时，执行的动作
+    searchText = self.searchBar.text;
+    NSLog(@"%@",searchText);
+    NSArray*debs = type ? [self 获取已备份] : [self 获取已安装];
+    if(searchText.length){
+        NSMutableArray*newapps = NSMutableArray.alloc.init;
+        for(int i=0;i<debs.count;i++){
+            NSDictionary *app  = debs[i];
+            NSString*name = app[@"Name"];
+            name = name.length ? name : app[@"Package"];
+            NSRange range = [name rangeOfString:searchText options:NSCaseInsensitiveSearch];
+            if (range.location != NSNotFound) {
+                [newapps addObject:app];
+            }
+        }
+        self.myData = newapps;
+    }else{
+        self.myData = debs;
+    }
+    self.tableView.scrollsToTop = YES;
+    [self.tableView reloadData];
 }
 - (UIImage *)imageWithColor:(UIColor *)color {
     CGRect rect = CGRectMake(0.0f, 0.0f, 1.0f, 1.0f);
@@ -246,12 +274,13 @@ static NSString* spawnRoot(NSArray* argss){
         }
     }
     if(!sender.tag){
-        [self 获取已安装];
+        self.myData = [self 获取已安装];
+        self.alldeb = [self 获取已安装:true];
         [self.tableView reloadData];
         type = false;
     }else{
         type = true;
-        [self 获取已备份];
+        self.myData = [self 获取已备份];
         [self.tableView reloadData];
         
     }
@@ -298,22 +327,22 @@ static NSString* spawnRoot(NSArray* argss){
 }
 
 #pragma mark - UITableViewDelegate
-- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    NSString *title = @"";
-    if(type==TRUE)title = @"已备份的插件，点击操作";
-    if(type==TRUE && self.myData.count==0)title = @"没有备份插件数据";
-    if(type==false && self.myData.count==0)title = @"你可能不在越狱状态或权限不足\n要用巨魔安装此程序";
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    headerLabel.numberOfLines = 0;
-    headerLabel.preferredMaxLayoutWidth = tableView.bounds.size.width;
-    
-    headerLabel.backgroundColor = [UIColor clearColor];
-    headerLabel.text = title;
-    headerLabel.numberOfLines = 0;
-    headerLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    headerLabel.textAlignment = NSTextAlignmentCenter;
-    return headerLabel;
-}
+//- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+//    NSString *title = @"";
+//    if(type==TRUE)title = @"已备份的插件，点击操作";
+//    if(type==TRUE && self.myData.count==0)title = @"没有备份插件数据";
+//    if(type==false && self.myData.count==0)title = @"你可能不在越狱状态或权限不足\n要用巨魔安装此程序";
+//    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+//    headerLabel.numberOfLines = 0;
+//    headerLabel.preferredMaxLayoutWidth = tableView.bounds.size.width;
+//
+//    headerLabel.backgroundColor = [UIColor clearColor];
+//    headerLabel.text = title;
+//    headerLabel.numberOfLines = 0;
+//    headerLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+//    headerLabel.textAlignment = NSTextAlignmentCenter;
+//    return headerLabel;
+//}
 - (CGFloat)textHeight:(NSString *)text {
     CGSize size = CGSizeMake(self.view.frame.size.width, CGFLOAT_MAX);
     CGRect rect = [text boundingRectWithSize:size
@@ -330,7 +359,7 @@ static NSString* spawnRoot(NSArray* argss){
 - (void)setTextViewframe{
     CGFloat navBarHeight = self.navigationController.navigationBar.frame.size.height;
     CGFloat screenwidth = [UIScreen mainScreen].bounds.size.width;
-    CGFloat tablewidth = self.tableView.frame.size.width;
+//    CGFloat tablewidth = self.tableView.frame.size.width;
     CGFloat screenheight = [UIScreen mainScreen].bounds.size.height;
     CGFloat textHeight = [self textHeight:self.textView.text];
     if(textHeight<screenheight){
@@ -370,7 +399,7 @@ static NSString* spawnRoot(NSArray* argss){
                 [alert addAction:[UIAlertAction actionWithTitle:@"确定备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                     NSMutableString*text = [NSMutableString alloc].init;
                     [self ShowtextView:text];
-                    NSArray*arr = [self 打包:indexPath.row];
+                    NSArray*arr = [self 打包:indexPath.row all:openall];
                     [text appendFormat:@"备份日志(双击隐藏)：\n插件名字：%@\n文件路径：%@",arr[0],arr[1]];
                     [self.textView setText:text];
                     [self setTextViewframe];
@@ -425,7 +454,7 @@ static NSString* spawnRoot(NSArray* argss){
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"删除" message:self.myData[indexPath.row][@"Name"] preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:@"只删除此备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 [fileManager removeItemAtPath:self.myData[indexPath.row][@"Path"] error:nil];
-                [self 获取已备份];
+                self.myData = [self 获取已备份];
                 [self.tableView reloadData];
             }]];
             
@@ -456,7 +485,7 @@ static NSString* spawnRoot(NSArray* argss){
         [alert addAction:[UIAlertAction actionWithTitle:@"安装所有备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"警告" message:@"插件可能会有依赖\n确保越狱商店已安装所需依赖" preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:@"确定安装" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-                [self 安装所有];
+               [self 安装所有];
             }]];
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
             [self presentViewController:alert animated:true completion:nil];
@@ -471,7 +500,7 @@ static NSString* spawnRoot(NSArray* argss){
     NSMutableString*text = [NSMutableString alloc].init;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         for(int i=0;i<self.myData.count;i++){
-            NSArray*arr=[self 打包:i];
+            NSArray*arr=[self 打包:i all:openall];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self ShowtextView:text];
                 [text appendFormat:@"备份日志(双击隐藏)：\n插件名字：%@\n文件路径：%@\n\n",arr[0],arr[1]];
@@ -497,11 +526,55 @@ static NSString* spawnRoot(NSArray* argss){
         }
     });
 }
-- (NSArray*)打包:(NSInteger)index{
+- (NSArray*)打包:(NSInteger)index all:(bool)all{
+    NSArray *allarr = [self 获取已安装:all];
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString*name = self.myData[index][@"Name"];
-    NSString*Version = self.myData[index][@"Version"];
-    NSString*Package = self.myData[index][@"Package"];
+    NSString*name = allarr[index][@"Name"];
+    NSString*Version = allarr[index][@"Version"];
+    NSString*Package = allarr[index][@"Package"];
+    NSString*Depends = allarr[index][@"Depends"];
+    /*
+    NSMutableArray *dependencyArray = [NSMutableArray array];
+    NSArray *components = [Depends componentsSeparatedByString:@","];
+    for (NSString *component in components) {
+        NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if ([trimmedComponent containsString:@"("] && [trimmedComponent containsString:@")"] && [trimmedComponent containsString:@"firmware"]) {
+            continue;
+        }
+        NSArray *subcomponents = [trimmedComponent componentsSeparatedByString:@"|"];
+        for (NSString *subcomponent in subcomponents) {
+            NSString *trimmedSubcomponent = [subcomponent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            if ([trimmedSubcomponent containsString:@"("] && [trimmedSubcomponent containsString:@")"]) {
+                NSRange range = [trimmedSubcomponent rangeOfString:@"("];
+                NSString *substring = [trimmedSubcomponent substringToIndex:range.location];
+                [dependencyArray addObject:substring];
+            } else {
+                [dependencyArray addObject:trimmedSubcomponent];
+            }
+        }
+    }
+    if(dependencyArray.count){
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            for(int i=0;i<dependencyArray.count;i++){
+                NSString *ylpid = dependencyArray[i];
+                
+                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"Package = %@", ylpid];
+                NSArray *filteredArray = [self.alldeb filteredArrayUsingPredicate:predicate];
+
+                if (filteredArray.count > 0) {
+                    NSDictionary *matchedDict = filteredArray.firstObject;
+                    NSUInteger matchedIndex = [self.alldeb indexOfObject:matchedDict];
+                    NSLog(@"matched index: %lu", (unsigned long)matchedIndex);
+                    NSLog(@"%@", self.alldeb[matchedIndex]);
+                    [self 打包:matchedIndex all:true];
+                }
+            }
+        });
+    }
+    NSLog(@"%@", dependencyArray);
+*/
+    
+    
     NSString *path = @"/var/mobile/Documents/DebBackup";
     BOOL isDirectory = NO;
     if(![fileManager fileExistsAtPath:path isDirectory:&isDirectory] || !isDirectory) {
