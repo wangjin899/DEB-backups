@@ -165,7 +165,7 @@ static NSString* spawnRoot(NSArray* argss){
 - (void)viewDidLoad {
     [super viewDidLoad];
     vc = self;
-    //    self.title = @"已安装";
+    self.navigationController.navigationBar.hidden = NO;
     self.navigationItem.title = @"已安装的插件";
     dispatch_async(dispatch_get_main_queue(), ^{
         LaunchPageViewController *viewController = [[LaunchPageViewController alloc] init];
@@ -215,17 +215,21 @@ static NSString* spawnRoot(NSArray* argss){
             [self.buttonArray addObject:button];
             [button setBackgroundImage:[self imageWithColor:selectedColor] forState:UIControlStateSelected];
         }
-        // 创建 UISearchBar 实例
-        self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 44)];
+        self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navigationController.navigationBar.frame), CGRectGetWidth(self.view.frame), 44)];
+        self.searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
         self.searchBar.placeholder = @"搜索,输入插件名字";
         self.searchBar.delegate = self;
-        UIView *backgroundView = [self.searchBar.subviews objectAtIndex:0];
-        UIImage *backgroundImage = [UIImage new];
-        [self.searchBar setBackgroundImage:backgroundImage];
         self.searchBar.backgroundColor = [UIColor clearColor];
+//        self.searchBar.backgroundColor = self.navigationItem.titleView.tintColor;
         self.searchBar.searchBarStyle = UISearchBarStyleMinimal;
-        self.tableView.tableHeaderView = self.searchBar;
+        [self.view addSubview:self.searchBar];
+        
+        [self.tableView setFrame:CGRectMake(0, CGRectGetMaxY(self.searchBar.frame), CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.bounds)-CGRectGetMaxY(self.searchBar.frame)-60)];
+
     });
+}
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
 }
 
 
@@ -386,16 +390,66 @@ static NSString* spawnRoot(NSArray* argss){
     self.textView.text = text;
     [self setTextViewframe];
 }
+- (NSString *)jiban:(NSString *)jiban{
+    NSCharacterSet *charSet = [NSCharacterSet characterSetWithCharactersInString:@" "];
+    NSString *debFileName = [[jiban componentsSeparatedByCharactersInSet:charSet] componentsJoinedByString:@""];
+    if([debFileName isEqual:@"mobilesubstrate"]){
+        return @"ElleKit/substrate/libhooker";
+    }
+    return debFileName;
+}
+- (GETYL) 获取依赖:(NSString*)Depends{
+    NSMutableString *str = [NSMutableString alloc].init;
+    NSMutableArray *dependencyArray = [NSMutableArray array];
+    NSArray *components = [Depends componentsSeparatedByString:@","];
+    for (NSString *component in components) {
+        NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if ([trimmedComponent containsString:@"("] && [trimmedComponent containsString:@")"] && [trimmedComponent containsString:@"firmware"]) {
+            continue;
+        }
+        NSArray *subcomponents = [trimmedComponent componentsSeparatedByString:@"|"];
+        for (NSString *subcomponent in subcomponents) {
+            NSString *trimmedSubcomponent = [subcomponent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            if ([trimmedSubcomponent containsString:@"("] && [trimmedSubcomponent containsString:@")"]) {
+                NSRange range = [trimmedSubcomponent rangeOfString:@"("];
+                NSString *substring = [trimmedSubcomponent substringToIndex:range.location];
+                [dependencyArray addObject:substring];
+                [str appendFormat:@"%@\n",[self jiban:substring]];
+            } else {
+                [dependencyArray addObject:trimmedSubcomponent];
+                [str appendFormat:@"%@\n",[self jiban:trimmedSubcomponent]];
+            }
+        }
+    }
+    GETYL arr;
+    arr.str = str;
+    arr.arr = dependencyArray;
+    arr.count = dependencyArray.count;
+    return arr;
+}
+
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    UITableViewCell *selectedCell = [tableView cellForRowAtIndexPath:indexPath];
     if(type==false){
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.myData[indexPath.row][@"Name"] message:self.myData[indexPath.row][@"Package"] preferredStyle:UIAlertControllerStyleAlert];
+        if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+            alert.popoverPresentationController.sourceView = selectedCell;
+            alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+        }
         [alert addAction:[UIAlertAction actionWithTitle:@"备份此插件" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.myData[indexPath.row][@"Name"] message:self.myData[indexPath.row][@"Package"] preferredStyle:UIAlertControllerStyleAlert];
-            
+            if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                alert.popoverPresentationController.sourceView = selectedCell;
+                alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+            }
             [alert addAction:[UIAlertAction actionWithTitle:@"备份当前插件" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提醒" message:@"如果插件较大\n本App可能会卡一会儿" preferredStyle:UIAlertControllerStyleAlert];
+                if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                    alert.popoverPresentationController.sourceView = selectedCell;
+                    alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+                }
                 [alert addAction:[UIAlertAction actionWithTitle:@"确定备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                     NSMutableString*text = [NSMutableString alloc].init;
                     [self ShowtextView:text];
@@ -432,7 +486,10 @@ static NSString* spawnRoot(NSArray* argss){
     }else{
         NSFileManager *fileManager = [NSFileManager defaultManager];
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.myData[indexPath.row][@"Name"] message:self.myData[indexPath.row][@"Package"] preferredStyle:UIAlertControllerStyleAlert];
-        
+        if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+            alert.popoverPresentationController.sourceView = selectedCell;
+            alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+        }
         [alert addAction:[UIAlertAction actionWithTitle:@"跳转Filza" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             NSString *filePath = self.myData[indexPath.row][@"Path"];
             NSCharacterSet *CharacterSet = [NSCharacterSet URLQueryAllowedCharacterSet];
@@ -452,6 +509,10 @@ static NSString* spawnRoot(NSArray* argss){
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"删除备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"删除" message:self.myData[indexPath.row][@"Name"] preferredStyle:UIAlertControllerStyleAlert];
+            if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                alert.popoverPresentationController.sourceView = selectedCell;
+                alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+            }
             [alert addAction:[UIAlertAction actionWithTitle:@"只删除此备份" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 [fileManager removeItemAtPath:self.myData[indexPath.row][@"Path"] error:nil];
                 self.myData = [self 获取已备份];
@@ -472,7 +533,16 @@ static NSString* spawnRoot(NSArray* argss){
         }]];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"安装此插件" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.myData[indexPath.row][@"Name"] message:@"插件可能会有依赖\n确保越狱商店已安装所需依赖" preferredStyle:UIAlertControllerStyleAlert];
+            GETYL dyl = [self 获取依赖:self.myData[indexPath.row][@"Depends"]];
+            NSString*msg = @"插件可能会有依赖\n确保越狱商店已安装所需依赖";
+            if(dyl.count){
+                msg = [NSString stringWithFormat:@"此插件有以下%lu个依赖\n%@确保越狱商店已安装所需依赖",dyl.count,dyl.str];
+            }
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.myData[indexPath.row][@"Name"] message:msg preferredStyle:UIAlertControllerStyleAlert];
+            if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                alert.popoverPresentationController.sourceView = selectedCell;
+                alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+            }
             [alert addAction:[UIAlertAction actionWithTitle:@"继续安装" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                 NSString * filePath = self.myData[indexPath.row][@"Path"];
                 NSString *cmdout = spawnRoot(@[@"dpkg",@"-i",filePath]);
@@ -490,8 +560,6 @@ static NSString* spawnRoot(NSArray* argss){
             [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
             [self presentViewController:alert animated:true completion:nil];
         }]];
-        
-        
         [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:true completion:nil];
     }
@@ -557,7 +625,6 @@ static NSString* spawnRoot(NSArray* argss){
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             for(int i=0;i<dependencyArray.count;i++){
                 NSString *ylpid = dependencyArray[i];
-                
                 NSPredicate *predicate = [NSPredicate predicateWithFormat:@"Package = %@", ylpid];
                 NSArray *filteredArray = [self.alldeb filteredArrayUsingPredicate:predicate];
 

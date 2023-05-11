@@ -29,17 +29,10 @@ enum JBType{
     JB_FUGU = 2,
 };
 typedef struct {
-    char *package;
-    char *name;
-    char *architecture;
-    char *depends;
-    char *version;
-    char *description;
-    char *maintainer;
-    char *author;
-    char *section;
-    char *path;
-}ControlInfo;
+    NSString*str;
+    NSArray *arr;
+    NSUInteger count;
+}GETYL;
 @interface ViewController : UIViewController 
 
 //@property (nonatomic) int jbtype;

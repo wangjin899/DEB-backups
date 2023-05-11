@@ -59,9 +59,11 @@
     NSArray *itemsx = groupData[@"itemsx"];
     
     if(indexPath.section==3){
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        NSInteger age = [defaults integerForKey:@"jbtype"];
         UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"Fugu/多巴胺", @"Xina", @"有根越狱"]];
         segmentedControl.frame = CGRectMake(10, 10, cell.contentView.bounds.size.width - 20, 30);
-        segmentedControl.selectedSegmentIndex = 0;
+        segmentedControl.selectedSegmentIndex = age;
         [segmentedControl addTarget:self action:@selector(segmentedControlValueChanged:) forControlEvents:UIControlEventValueChanged];
         [cell.contentView addSubview:segmentedControl];
         
@@ -114,6 +116,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    UITableViewCell *selectedCell = [tableView cellForRowAtIndexPath:indexPath];
     NSDictionary *groupData = self.data[indexPath.section];
     //    NSArray *items = groupData[@"items"];
     NSArray *itemsx = groupData[@"itemsx"];
@@ -123,7 +126,7 @@
     }
     
     if(indexPath.section == 2){
-        [self RootToNoRoot];
+        [self RootToNoRoot:selectedCell];
     }
     
     if(indexPath.section == 4){
@@ -136,7 +139,7 @@
         }
     }
 }
-- (void)RootToNoRoot{
+- (void)RootToNoRoot:(UITableViewCell *)selectedCell{
     NSString *path = @"/var/mobile/Documents/RootedToRootless";
     BOOL isDirectory = NO;
     NSMutableArray*deb = NSMutableArray.alloc.init;
@@ -156,6 +159,11 @@
     }
     NSString*bt = deb.count ? @"转换成功不代表兼容可用\n转换仅是让有根插件能在无根越狱安装成功" : @"没有文件，请先把要转换的deb放到\n/var/mobile/Documents/RootedToRootless\n文件夹内";
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:bt preferredStyle:UIAlertControllerStyleAlert];
+    // 在iPad上设置源视图和源矩形
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        alert.popoverPresentationController.sourceView = selectedCell;
+        alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+    }
     for(int i=0;i<deb.count;i++){
         NSMutableDictionary* dic = [[ViewController alloc]read_control_info:[deb[i] UTF8String]];
         [alert addAction:[UIAlertAction actionWithTitle:dic[@"Name"] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
@@ -257,6 +265,10 @@
                                 [[ViewController alloc]spawnRoot:@[@"dpkg-deb",@"-b",npath,debFilepath]];
                                 [[ViewController alloc]spawnRoot:@[@"rm",@"-rf",npath]];
                                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"转换完毕" message:debFilepath preferredStyle:UIAlertControllerStyleAlert];
+                                if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                                    alert.popoverPresentationController.sourceView = selectedCell;
+                                    alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+                                }
                                 [alert addAction:[UIAlertAction actionWithTitle:@"跳转Filza查看" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                                     NSCharacterSet *CharacterSet = [NSCharacterSet URLQueryAllowedCharacterSet];
                                     NSString *encodedURLString = [debFilepath stringByAddingPercentEncodingWithAllowedCharacters:CharacterSet];
@@ -271,6 +283,10 @@
                 }
             }else if([dic[@"Architecture"]isEqual:@"iphoneos-arm64"]){
                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"此插件已是无根deb" preferredStyle:UIAlertControllerStyleAlert];
+                if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                    alert.popoverPresentationController.sourceView = selectedCell;
+                    alert.popoverPresentationController.sourceRect = selectedCell.bounds;
+                }
                 [alert addAction:[UIAlertAction actionWithTitle:@"跳转Filza查看" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actiona) {
                     NSCharacterSet *CharacterSet = [NSCharacterSet URLQueryAllowedCharacterSet];
                     NSString *encodedURLString = [deb[i] stringByAddingPercentEncodingWithAllowedCharacters:CharacterSet];
@@ -297,6 +313,8 @@
     if(sender.selectedSegmentIndex == 2){
         [[[ViewController alloc]init]selectedSegmentIndexxxxx:@""xxxxx:@"/usr/bin/"];
     }
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setInteger:sender.selectedSegmentIndex forKey:@"jbtype"];
 }
 @end
 

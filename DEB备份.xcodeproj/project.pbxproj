@@ -9,10 +9,7 @@
 /* Begin PBXBuildFile section */
 		BC1FAAD929FB0C5000CAC234 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC1FAAD829FB0C5000CAC234 /* UIKit.framework */; };
 		BC20F80529F5542600A3B4E7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BC20F80429F5542600A3B4E7 /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-mllvm -enable-bcfobf -mllvm -enable-strcry -mllvm -enable-indibran -mllvm -enable-subobf -mllvm -bcf_prob=99 -mllvm -bcf_loop=2 -mllvm -split_num=9"; }; };
-		BC20F80829F5542600A3B4E7 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BC20F80729F5542600A3B4E7 /* SceneDelegate.m */; settings = {COMPILER_FLAGS = "-mllvm -enable-bcfobf -mllvm -enable-strcry -mllvm -enable-indibran -mllvm -enable-subobf -mllvm -bcf_prob=99 -mllvm -bcf_loop=2 -mllvm -split_num=9"; }; };
-		BC20F80E29F5542600A3B4E7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC20F80C29F5542600A3B4E7 /* Main.storyboard */; };
 		BC20F81029F5542700A3B4E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC20F80F29F5542700A3B4E7 /* Assets.xcassets */; };
-		BC20F81329F5542700A3B4E7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC20F81129F5542700A3B4E7 /* LaunchScreen.storyboard */; };
 		BC6BD76629F5B76B00FC97DE /* libz.1.2.11.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BC6BD76529F5B76B00FC97DE /* libz.1.2.11.tbd */; };
 		BC6BD76829F5B77400FC97DE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BC6BD76729F5B77400FC97DE /* libz.tbd */; };
 		BC6BD76A29F5B7CC00FC97DE /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = BC6BD76929F5B7CC00FC97DE /* libbz2.tbd */; };
@@ -31,12 +28,8 @@
 		BC20F80029F5542600A3B4E7 /* DEB备份.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DEB备份.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC20F80329F5542600A3B4E7 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BC20F80429F5542600A3B4E7 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		BC20F80629F5542600A3B4E7 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
-		BC20F80729F5542600A3B4E7 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		BC20F80929F5542600A3B4E7 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		BC20F80D29F5542600A3B4E7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BC20F80F29F5542700A3B4E7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		BC20F81229F5542700A3B4E7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BC20F81429F5542700A3B4E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC20F81529F5542700A3B4E7 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BC20F81D29F5555000A3B4E7 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -100,15 +93,11 @@
 				BC1FAADA29FB6C4000CAC234 /* zstd.h */,
 				BC20F80329F5542600A3B4E7 /* AppDelegate.h */,
 				BC20F80429F5542600A3B4E7 /* AppDelegate.m */,
-				BC20F80629F5542600A3B4E7 /* SceneDelegate.h */,
-				BC20F80729F5542600A3B4E7 /* SceneDelegate.m */,
 				BC6BD83829F5D6DD00FC97DE /* ViewController.m */,
 				BC20F80929F5542600A3B4E7 /* ViewController.h */,
 				BC6BD83C29F694B900FC97DE /* LaunchPageViewController.h */,
 				BC6BD83B29F694B900FC97DE /* LaunchPageViewController.m */,
-				BC20F80C29F5542600A3B4E7 /* Main.storyboard */,
 				BC20F80F29F5542700A3B4E7 /* Assets.xcassets */,
-				BC20F81129F5542700A3B4E7 /* LaunchScreen.storyboard */,
 				BC20F81429F5542700A3B4E7 /* Info.plist */,
 				BC20F81529F5542700A3B4E7 /* main.m */,
 			);
@@ -191,9 +180,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC20F81329F5542700A3B4E7 /* LaunchScreen.storyboard in Resources */,
 				BC20F81029F5542700A3B4E7 /* Assets.xcassets in Resources */,
-				BC20F80E29F5542600A3B4E7 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,30 +215,10 @@
 				BC20F80529F5542600A3B4E7 /* AppDelegate.m in Sources */,
 				BC6BD83929F5D6DD00FC97DE /* ViewController.m in Sources */,
 				BC6BD83D29F694B900FC97DE /* LaunchPageViewController.m in Sources */,
-				BC20F80829F5542600A3B4E7 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		BC20F80C29F5542600A3B4E7 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BC20F80D29F5542600A3B4E7 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		BC20F81129F5542700A3B4E7 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BC20F81229F5542700A3B4E7 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		BC20F81729F5542700A3B4E7 /* Debug */ = {
@@ -370,7 +337,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=iphoneos*]" = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -380,7 +347,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "DEB备份/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -413,7 +380,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=iphoneos*]" = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -423,7 +390,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "DEB备份/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
